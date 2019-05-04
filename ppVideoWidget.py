@@ -1,0 +1,105 @@
+"""
+DroneVisionGUI is a new class that parallels DroneVision but with several important changes.
+
+1) This module uses VLC instead of FFMPEG
+2) This module opens a GUI window to show you the video in real-time (you could
+watch it in real-time previously through the VisionServer)
+3) Because GUI windows are different on different OS's (and in particular OS X behaves differently
+than linux and windows) and because they want to run in the main program thread, the way your program runs
+is different.  You first open the GUI and then you have the GUI spawn a thread to run your program.
+4) This module can use a virtual disk in memory to save the images, thus shortening the time delay for the
+camera for your programs.
+
+Author: Amy McGovern, dramymcgovern@gmail.com
+Some of the LIBVLC code comes from
+Author: Valentin Benke, valentin.benke@aon.at
+"""
+#import cv2
+import time
+from functools import partial
+import tempfile
+import sys
+import vlc.vlc as vlc
+from PySide2.QtCore import Qt, QSize
+from PySide2.QtGui import QPalette, QColor, QPainter
+from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame, QPushButton
+
+
+class ppVideoWidget(QFrame):
+    def __init__(self, buffer_size=1, network_caching=20, fps=20):
+        super().__init__()
+
+        """
+        Set up the window for the VLC viewer
+        """
+
+        # In this widget, the video will be drawn
+        # if sys.platform == "darwin": # for MacOS
+        #     from PyQt5.QtWidgets import QMacCocoaViewContainer
+        #     self.videoframe = QMacCocoaViewContainer(0)
+        # else:
+        #     self.videoframe = QFrame()
+        
+        #self.palette = self.videoframe.palette()
+        #self.palette.setColor (QPalette.Window,QColor(0,0,0))
+        #self.videoframe.setPalette(self.palette)
+        #self.videoframe.setAutoFillBackground(True)
+        #self.videoframe.setMinimumSize(640,480)
+        #self.hinfobox.addWidget(QLabel("infos"))
+        # self.layout = QVBoxLayout()
+        # self.layout.addWidget(self.videoframe)
+        # self.setLayout(self.layout)
+        self.setMinimumSize(640,480)
+        
+        # setup vlc media player
+        self.mediaplayer = None
+        self.fps = fps
+        self.vision_interval = int(1000 * 1.0 / self.fps)
+        self.buffer_size = buffer_size
+        
+        self.buffer = [None] * buffer_size
+        self.buffer_size = buffer_size
+        self.buffer_index = 0
+
+        # save the caching parameters and choice of libvlc
+        self.network_caching = network_caching
+
+    def open_video(self,sdpfile=None):
+        if(sdpfile==None):
+            return
+        print("-------------------------------")
+        print("open video stream")
+#        self.stream_adress = self.sdpPath+"/"+IP+".sdp"
+        self.stream_adress = sdpfile
+        # initialise the vlc-player with the network-caching
+        print("-------------------------------")
+        print("stream addr : ", self.stream_adress)
+        print("network-caching : ", self.network_caching)
+
+        self.mediaplayer = vlc.MediaPlayer(self.stream_adress, ":network-caching=" + str(self.network_caching))
+        # the media player has to be 'connected' to the QFrame
+        # (otherwise a video would be displayed in it's own window)
+        # this is platform specific!
+        # you have to give the id of the QFrame (or similar object) to
+        # vlc, different platforms have different functions for this
+
+        #if sys.platform.startswith('linux'): # for Linux using the X Server
+        #     self.mediaplayer.set_xwindow(self.videoframe.winId())
+        # elif sys.platform == "win32": # for Windows
+        #     self.mediaplayer.set_hwnd(self.videoframe.winId())
+        # elif sys.platform == "darwin": # for MacOS
+        #     self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
+        if sys.platform.startswith('linux'): # for Linux using the X Server
+            self.mediaplayer.set_xwindow(self.winId())
+        elif sys.platform == "win32": # for Windows
+            self.mediaplayer.set_hwnd(self.winId())
+
+        # start the buffering
+        success = self.mediaplayer.play()
+        print("success from play call is %s " % success)
+
+    def close_video(self):
+        if(self.mediaplayer is not None):
+            self.mediaplayer.stop()
+
+
