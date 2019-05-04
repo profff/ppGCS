@@ -1,0 +1,4 @@
+[submodule "bybop"]
+	path = bybop
+	url = https://github.com/profff/bybop.git
+	branch = master
