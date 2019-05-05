@@ -3,7 +3,8 @@
 stands for Parrot Python Ground Control Software
 -
 
-ok ok guys it's not another sexyiest Free Flight Pro
+ok ok guys it's not another sexyiest Free Flight Pro clone
+
 to be clear it's the uglyiest GCS you have ever seen (if you are god of QT and / or PySide2 your contributions are more than welcome)
 
 the objective is to be more easy plateform for seveal test purpose 
