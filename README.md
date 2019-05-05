@@ -14,11 +14,13 @@ install
 -
 it's intended to work on python3 variant 
 
-you need zeroconf and pyside2 
+you need zeroconf pygame and pyside2 
 ``` pip3 install zeroconf PySide2```
+``` python3 -m pip install -U pygame --user```
 
 clone this repo 
 ``` git clone https://github.com/profff/ppGCS.git ```
 
 add submodules
 ```git submodule init; git submodule update```
+```chmod +x ./ppGCS.py``` 
