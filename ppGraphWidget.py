@@ -7,8 +7,9 @@ from PySide2.QtGui import QPainter
 
 class ppGraphWidget(QWidget):
 
-    def __init__(self,p):
+    def __init__(self,p,title):
         QWidget.__init__(self)
+        title=QLabel(title)
         self._frame=QFrame()
         self._lMax=QLabel(str(0))
         self._lMax.setMaximumWidth(35)
@@ -18,6 +19,7 @@ class ppGraphWidget(QWidget):
         llayout = QVBoxLayout()
         llayout.setSpacing(0);
         llayout.setMargin(0);
+        llayout.addWidget(title)
         llayout.addWidget(self._lMax)
         llayout.addWidget(self._lVal)
         layout = QHBoxLayout()
@@ -48,7 +50,7 @@ class ppGraphWidget(QWidget):
         painter = QPainter(self)
         r=self._frame.rect()
         r-=QMargins(3,3,3,4)
-#        painter.drawRect(r)
+        painter.drawRect(r)
         h=len(self._history)
         if(h>5):
             csmp=round(self._length/self._periodicity)
@@ -64,7 +66,6 @@ class ppGraphWidget(QWidget):
                 y1=r.top()+r.height()-v1*yr
                 y2=r.top()+r.height()-v2*yr
                 painter.drawLine(x1,y1,x2,y2)
-        #        print(x1,y1,x2,y2)
                 i-=1
                 c-=1
         

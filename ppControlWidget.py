@@ -63,12 +63,10 @@ class ppControlWidget(QWidget, QThread):
         painter = QPainter(self)
         r=self.rect()
         r-=QMargins(0,0,1,1)
-        painter.drawRoundedRect(r,5,5)
-
+        painter.drawRect(r)
         c1=QPoint(r.width()/4,r.height()/2)
         c2=QPoint(3*r.width()/4,r.height()/2)
-        
-        r1=(r.height()*0.8)/2
+        r1=(r.height()*0.90)/2
         rc=(r.height()*0.1)/2
         painter.drawEllipse(c1,r1,r1)
         painter.drawEllipse(c2,r1,r1)

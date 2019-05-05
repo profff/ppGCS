@@ -10,10 +10,6 @@ class ppDeviceInfoWidget(QWidget, QThread):
     def __init__(self):
         QWidget.__init__(self)
         QThread.__init__(self)
-        self.gbInfos=QGroupBox()
-        self.gbCmd=QGroupBox()
-        self.infolayout = QVBoxLayout()
-        self.cmdlayout = QVBoxLayout()
         self._running=True
         self._instance=None
         self.lconnected = QLabel('')
@@ -24,18 +20,17 @@ class ppDeviceInfoWidget(QWidget, QThread):
         self.bCircle.setDisabled(True)
         self.bRTH = QPushButton('')
         self.bRTH.setDisabled(True)
-        self.infolayout.addWidget(self.lconnected)
-        self.infolayout.addWidget(self.lFlyState)
-        self.gbInfos.setLayout(self.infolayout)
-        self.cmdlayout.addWidget(self.bTakeoff)
-        self.cmdlayout.addWidget(self.bCircle)
-        self.cmdlayout.addWidget(self.bRTH)
-        self.gbCmd.setLayout(self.cmdlayout)
-
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.gbInfos)
-        self.layout.addWidget(self.gbCmd)
+        self.layout.addWidget(self.lconnected)
+        self.layout.addWidget(self.lFlyState)
+        self.layout.addWidget(self.bTakeoff)
+        self.layout.addWidget(self.bCircle)
+        self.layout.addWidget(self.bRTH)
         self.setLayout(self.layout)
+        self.bTakeoff.clicked.connect(self.takeoff)
+        self.bCircle.clicked.connect(self.circle)
+        self.bRTH.clicked.connect(self.rth)
+
         self.start()
         
     def __del__(self):
@@ -54,14 +49,49 @@ class ppDeviceInfoWidget(QWidget, QThread):
                 if fst==0 : # landed
                     self.bTakeoff.setDisabled(False)
                     self.bTakeoff.setText('Take Off')
+                    self.bCircle.setDisabled(True)
+                    self.bCircle.setText('Circle')
+                    self.bRTH.setDisabled(True)
+                    self.bRTH.setText('RTH')
+                elif fst==1: # takingoff
+                    self.bTakeoff.setDisabled(False)
+                    self.bTakeoff.setText('stop')
+                    self.bCircle.setDisabled(True)
+                    self.bCircle.setText('Circle')
+                    self.bRTH.setDisabled(True)
+                    self.bRTH.setText('RTH')
+                elif fst==2: # hovering
+                    self.bTakeoff.setDisabled(False)
+                    self.bTakeoff.setText('Land')
+                    self.bCircle.setDisabled(True)
+                    self.bCircle.setText('Circle')
+                    self.bRTH.setDisabled(False)
+                    self.bRTH.setText('RTH')
+                elif fst==3: # flying
+                    self.bTakeoff.setDisabled(False)
+                    self.bTakeoff.setText('Land')
                     self.bCircle.setDisabled(False)
                     self.bCircle.setText('Circle')
                     self.bRTH.setDisabled(False)
                     self.bRTH.setText('RTH')
                 else:
-                    self.bTakeoff.setDisabled(True)
+                    self.bTakeoff.setDisabled(False)
+                    self.bTakeoff.setText('stop')
+                    self.bCircle.setDisabled(False)
+                    self.bCircle.setText('Circle')
+                    self.bRTH.setDisabled(False)
+                    self.bRTH.setText('RTH')
 
             time.sleep(0.2)
+
+    def takeoff(self):
+        self._instance.tkof_lnd_emcy()
+    def circle(self):
+        self._instance.circle()
+    def rth(self):
+        self._instance.rth()
+    
+            
     @property
     def device(self):
         return self._instance

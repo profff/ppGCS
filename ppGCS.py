@@ -58,6 +58,6 @@ if __name__ == "__main__":
     win.setFont(font)
     pp=ppGCSMain()
     win.setCentralWidget(pp)
-    win.resize(800, 600)
+    win.resize(1200, 600)
     win.show()
     sys.exit(app.exec_())

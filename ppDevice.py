@@ -75,6 +75,12 @@ class ppDevice(QListWidgetItem):
     @property
     def yaw(self):
         return self.drone.get_attitude()['yaw']
+    @property
+    def batt(self):
+        return self.drone.get_battery()
+    @property
+    def heading(self):
+        return self.drone.get_heading()
         
     def connect(self):
         d2c_port = 54321
@@ -88,12 +94,25 @@ class ppDevice(QListWidgetItem):
     def stop_stream(self):
         self.drone.stop_streaming()
     
-    def takeoff():
-        return self.drone.takeoff()
-    def land():
+    def tkof_lnd_emcy(self):
+        fs=self.flystate
+        if fs==0 : # landed
+            return self.drone.take_off()
+        elif fs==2 or fs==3: #hovering or flying
+            return self.drone.land()
+        else: # every thing else
+            return self.drone.emergency()
+        
+    def land(self):
         return self.drone.land()
+    def rth(self):
+        return self.drone.RTH()
+    def circle(self):
+        return self.drone.circle()
+    def emcy(self):
+        return self.drone.emergency()
     
-    def PCMD(pitch,roll,yaw,gaz):
+    def PCMD(self,pitch,roll,yaw,gaz):
         return self.drone.PCMD(pitch,roll,yaw,gaz)
     
     

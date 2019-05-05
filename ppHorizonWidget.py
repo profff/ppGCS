@@ -23,8 +23,8 @@ class ppHorizonWidget(QWidget):
         llayout = QVBoxLayout()
         llayout.setSpacing(0);
         llayout.setMargin(0);
-        llayout.addWidget(self._lRoll)
         llayout.addWidget(self._lPitch)
+        llayout.addWidget(self._lRoll)
         layout = QHBoxLayout()
         layout.setSpacing(0);
         layout.setMargin(0);
