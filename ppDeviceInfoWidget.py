@@ -74,6 +74,13 @@ class ppDeviceInfoWidget(QWidget, QThread):
                     self.bCircle.setText('Circle')
                     self.bRTH.setDisabled(False)
                     self.bRTH.setText('RTH')
+                elif fst==4: # landing
+                    self.bTakeoff.setDisabled(False)
+                    self.bTakeoff.setText('Re take off')
+                    self.bCircle.setDisabled(False)
+                    self.bCircle.setText('Circle')
+                    self.bRTH.setDisabled(False)
+                    self.bRTH.setText('RTH')
                 else:
                     self.bTakeoff.setDisabled(False)
                     self.bTakeoff.setText('stop')

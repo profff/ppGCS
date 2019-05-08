@@ -21,6 +21,7 @@ class ppDevice(QListWidgetItem):
     def __init__(self, device):
         self._dev=device
         self._instance=None
+        self._pcmdseq=0
         super().__init__(get_name(device))
         fullPath = inspect.getfile(ppDevice)
         shortPathIndex = fullPath.rfind("/")
@@ -61,7 +62,6 @@ class ppDevice(QListWidgetItem):
     
     @property
     def flystate(self):
-        #return self.strFlyState[self.drone.get_flystatus()['state']]
         return self.drone.get_flystatus()['state']
     @property
     def altitude(self):
@@ -100,6 +100,8 @@ class ppDevice(QListWidgetItem):
             return self.drone.take_off()
         elif fs==2 or fs==3: #hovering or flying
             return self.drone.land()
+        elif fs==4: #landing
+            return self.drone.take_off()
         else: # every thing else
             return self.drone.emergency()
         
@@ -113,7 +115,11 @@ class ppDevice(QListWidgetItem):
         return self.drone.emergency()
     
     def PCMD(self,pitch,roll,yaw,gaz):
-        return self.drone.PCMD(pitch,roll,yaw,gaz)
+        t=int(round(time.time()*1000))
+        t=t&0x00FFFFFF
+        s=self._pcmdseq<<24
+        tp=s+t
+        return self.drone.set_PCMD(pitch,roll,yaw,gaz,tp)
     
     
         

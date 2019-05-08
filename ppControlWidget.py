@@ -42,11 +42,13 @@ class ppControlWidget(QWidget, QThread):
 
         self._running=True
         self._instance=None
+        self._periodicity=0.05 #time period between loops
         self.frame=QFrame()
         self.setFixedSize(100,50)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.frame)
         self.setLayout(self.layout)
+        pygame.event.pump()
         self._LStickV=self._joystick.get_axis(2)
         self._LStickH=self._joystick.get_axis(3)
         self._RStickV=self._joystick.get_axis(1)
@@ -82,15 +84,20 @@ class ppControlWidget(QWidget, QThread):
     def run(self):
         while(self._running):
             if(self._instance is not None):
-                pass
+                p=round(self._RStickV*100)
+                r=round(self._RStickV*100)
+                y=round(self._RStickV*100)
+                t=round(self._RStickV*100)
+                self._instance.PCMD(p,r,y,t)
+
             pygame.event.pump()
             self._LStickV=self._joystick.get_axis(2)
             self._LStickH=self._joystick.get_axis(3)
             self._RStickV=self._joystick.get_axis(1)
             self._RStickH=self._joystick.get_axis(0)
-
             self.update()
-            time.sleep(0.05)
+            time.sleep(self._periodicity)
+
     @property
     def device(self):
         return self._instance

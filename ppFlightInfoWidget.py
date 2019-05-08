@@ -9,6 +9,7 @@ import math
 from ppGraphWidget import *
 from ppHorizonWidget import *
 from ppBousoleWidget import *
+from geomath import getDistanceClose
 
 class ppFlightInfoWidget(QWidget, QThread):
     def __init__(self):
@@ -79,8 +80,8 @@ class ppFlightInfoWidget(QWidget, QThread):
                 gspd=round(spn*10)
                 
                 self._altgraph.addValue(self._instance.altitude)
-                self._battgraphitt+=1
-                self._battgraphitt=self._battgraphitt%5
+                self._battgraphitt+=self._periodicity
+                self._battgraphitt=self._battgraphitt % 5
                 if(self._battgraphitt==0):
                     self._battgraph.addValue(self._instance.batt)
                 self._horizon.roll=self._instance.roll
