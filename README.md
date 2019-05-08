@@ -26,6 +26,7 @@ clone this repo
 
 add submodules
   
-  ```git submodule init; git submodule update```
+  ```cd ppGCS/bybop; git submodule init; git submodule update```
   
-  ```chmod +x ./ppGCS.py``` 
+  ```cd ppGCS/bybop/arsdk-xml/; git submodule init; git submodule update```
+  
