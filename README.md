@@ -28,5 +28,5 @@ add submodules
   
   ```cd ppGCS/bybop; git submodule init; git submodule update```
   
-  ```cd ppGCS/bybop/arsdk-xml/; git submodule init; git submodule update```
+  ```cd arsdk-xml/; git submodule init; git submodule update```
   
