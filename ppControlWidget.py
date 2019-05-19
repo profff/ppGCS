@@ -84,6 +84,12 @@ class ppControlWidget(QWidget, QThread):
     
     def run(self):
         while(self._running):
+            pygame.event.pump()
+            self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
+                          'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
+                          'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
+                          'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
+
             if(self._instance is not None):
                 p=round(100*self._Sticks[sticktofunc['pitch']])
                 r=round(100*self._Sticks[sticktofunc['roll']])
@@ -91,19 +97,20 @@ class ppControlWidget(QWidget, QThread):
                 t=round(100*self._Sticks[sticktofunc['gaz']])
                 self._instance.PCMD(p,r,y,t)
 
-            pygame.event.pump()
-            self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
-                          'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
-                          'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
-                          'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
-            for event in pygame.event.get(): # User did something
-                if event.type == pygame.JOYBUTTONDOWN:
-                    if(switchtofunc[event.button]=='start'):
-                        self._instance.tkof_lnd_emcy()
-                    if(switchtofunc[event.button]=='rth'):
-                        self._instance.rth()
-                    
-            
+                for event in pygame.event.get(): # User did something
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if(event.button in switchtofunc.keys()):
+                            if(switchtofunc[event.button]=='start'):
+                                try: 
+                                    self._instance.tkof_lnd_emcy()
+                                except:
+                                    print("no device selected")
+                            if(switchtofunc[event.button]=='rth'):
+                                try: 
+                                    self._instance.rth()
+                                except:
+                                    print("no device selected")
+
             self.update()
             time.sleep(self._periodicity)
 
