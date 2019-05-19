@@ -17,7 +17,7 @@ class ppDiscoverWidget(QWidget,Discovery):
     DeviceChanged=Signal(ppDevice)
     def __init__(self):
         QWidget.__init__(self)
-        Discovery.__init__(self,[DeviceID.DISCO])
+        Discovery.__init__(self,DeviceID.BEBOP_FAMILY)
         
         self.button = QPushButton("Refresh Devices")
         self.lst = QListWidget(self)

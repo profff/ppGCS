@@ -62,7 +62,10 @@ class ppFlightInfoWidget(QWidget, QThread):
         while(self._running):
             if(self._instance is not None):
                 fst=self._instance.flystate
-                asp=round(self._instance.drone.get_airspeed()*10)
+                try:
+                    asp=round(self._instance.drone.get_airspeed()*10)
+                except:
+                    asp=0
                 spd=self._instance.drone.get_speeds()
                 spdx=spd['speedX']
                 spdy=spd['speedY']
