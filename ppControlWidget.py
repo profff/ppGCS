@@ -22,7 +22,7 @@ axisreverse={'lv':-1,
 sticktofunc={'pitch':'rv',
              'roll':'rh',
              'gaz':'lv',
-             'yaw':'rh'}
+             'yaw':'lh'}
 switchtofunc={0:'start',
               2:'rth'}
 
