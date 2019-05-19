@@ -9,19 +9,22 @@ import time
 from ppDevice import *
 import pygame
 
-axistostick={'name':'default',
-             'left-vertical':2,
-             'left-horizontal':3,
-             'right-vertical':1,
-             'right-horizontal':0}
+axistostick={'lv':1,
+             'lh':0,
+             'rv':3,
+             'rh':2}
 
-sticktofunc={'name':'default',
-             'pitch':1,
-             'roll':0,
-             'gaz':2,
-             'yaw':3,
-             'takeoff':None,
-             'rth':None}
+axisreverse={'lv':-1,
+             'lh':1,
+             'rv':-1,
+             'rh':1}
+
+sticktofunc={'pitch':'rv',
+             'roll':'rh',
+             'gaz':'lv',
+             'yaw':'rh'}
+switchtofunc={0:'start',
+              2:'rth'}
 
 class ppControlWidget(QWidget, QThread):
 
@@ -49,12 +52,10 @@ class ppControlWidget(QWidget, QThread):
         self.layout.addWidget(self.frame)
         self.setLayout(self.layout)
         pygame.event.pump()
-        self._LStickV=self._joystick.get_axis(2)
-        self._LStickH=self._joystick.get_axis(3)
-        self._RStickV=self._joystick.get_axis(1)
-        self._RStickH=self._joystick.get_axis(0)
-        print(self._LStickV,self._LStickH,self._RStickV,self._RStickH)
-        
+        self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
+                      'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
+                      'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
+                      'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
         self.start()
         
     def __del__(self):
@@ -73,8 +74,8 @@ class ppControlWidget(QWidget, QThread):
         painter.drawEllipse(c1,r1,r1)
         painter.drawEllipse(c2,r1,r1)
         global axistostick
-        c1=QPoint(r.width()/4-(self._LStickH*r1),r.height()/2-(self._LStickV*r1))
-        c2=QPoint(3*r.width()/4-(self._RStickH*r1),r.height()/2-(self._RStickV*r1))
+        c1=QPoint(r.width()/4+(self._Sticks['lh']*r1),r.height()/2-(self._Sticks['lv']*r1))
+        c2=QPoint(3*r.width()/4+(self._Sticks['rh']*r1),r.height()/2-(self._Sticks['rv']*r1))
         painter.drawEllipse(c1,rc,rc)
         painter.drawEllipse(c2,rc,rc)
 
@@ -84,17 +85,25 @@ class ppControlWidget(QWidget, QThread):
     def run(self):
         while(self._running):
             if(self._instance is not None):
-                p=round(self._RStickV*100)
-                r=round(self._RStickV*100)
-                y=round(self._RStickV*100)
-                t=round(self._RStickV*100)
+                p=round(100*self._Sticks[sticktofunc['pitch']])
+                r=round(100*self._Sticks[sticktofunc['roll']])
+                y=round(100*self._Sticks[sticktofunc['yaw']])
+                t=round(100*self._Sticks[sticktofunc['gaz']])
                 self._instance.PCMD(p,r,y,t)
 
             pygame.event.pump()
-            self._LStickV=self._joystick.get_axis(2)
-            self._LStickH=self._joystick.get_axis(3)
-            self._RStickV=self._joystick.get_axis(1)
-            self._RStickH=self._joystick.get_axis(0)
+            self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
+                          'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
+                          'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
+                          'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
+            for event in pygame.event.get(): # User did something
+                if event.type == pygame.JOYBUTTONDOWN:
+                    if(switchtofunc[event.button]=='start'):
+                        self._instance.tkof_lnd_emcy()
+                    if(switchtofunc[event.button]=='rth'):
+                        self._instance.rth()
+                    
+            
             self.update()
             time.sleep(self._periodicity)
 
