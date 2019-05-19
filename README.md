@@ -35,3 +35,10 @@ install vlc and libvlc
 
 
 this is in perputual developpement so if it dont fit's your needs be patient or be active !!!!! ;)   
+
+launch
+-
+```./ppGCS.py```
+when started be sure to be connected to your parrot device via wifi or anything else (for exemple : zerotier if using uavpal 4g mod)
+clic search device button
+5 sec later your device must appear in left pannel just clic on it you are good to go ! 
