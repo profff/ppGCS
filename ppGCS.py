@@ -2,7 +2,10 @@
 import sys
 import random
 from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout
-from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget
+from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget, QTabWidget
+from PySide2.QtWebEngineWidgets import QWebEngineView
+from PySide2.QtQuick import QQuickView
+from PySide2.QtCore import QUrl
 from PySide2.QtGui import QFont
 import time
 from ppDevice import *
@@ -22,12 +25,23 @@ class ppGCSMain(QWidget):
         self.leftcol_layout = QVBoxLayout()
         self.leftcol_layout.addWidget(self.DeviceInfo)
         self.leftcol_layout.addWidget(self.DeviceList)
-         
+
         self.VideoViewer=ppVideoWidget()
+
+        self.tabs=QTabWidget()
+        self.tabs.addTab(self.VideoViewer,"Video stream")
+        self.mapview = QQuickView()
+        self.mapcontainer=QWidget.createWindowContainer(self.mapview,self)
+        url = QUrl("map.qml")
+        self.mapview.setSource(url)
+        self.mapview.show()
+        self.tabs.addTab(self.mapcontainer,"map view")
+        
+
         self.FlightInfo=ppFlightInfoWidget()
         self.ControlInfo=ppControlWidget()
         self.rightcol_layout = QVBoxLayout()
-        self.rightcol_layout.addWidget(self.VideoViewer)
+        self.rightcol_layout.addWidget(self.tabs)
         self.lowrightcol_layout = QHBoxLayout()
         self.lowrightcol_layout.addWidget(self.FlightInfo)
         self.lowrightcol_layout.addWidget(self.ControlInfo)

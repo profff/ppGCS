@@ -1,30 +1,52 @@
 import sys
 from PySide2.QtWidgets import QApplication, QListWidgetItem, QListWidget
-from PySide2.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel
-from PySide2.QtWidgets import QGroupBox, QFrame
+from PySide2.QtWidgets import QHBoxLayout, QPushButton, QWidget, QLabel
+from PySide2.QtWidgets import QGroupBox, QFrame,QDialog,QLineEdit, QVBoxLayout
 from PySide2.QtCore import Signal, Slot, QThread, QMargins, QPoint
-from PySide2.QtGui import QPainter
+from PySide2.QtGui import QPainter,QIcon
 
 import time
 from ppDevice import *
 import pygame
+joytofunc={'axistostick':{'lv':1,
+                          'lh':0,
+                          'rv':3,
+                          'rh':2},
+           'axisreverse':{'lv':-1,
+                          'lh':1,
+                          'rv':-1,
+                          'rh':1},
+           'sticktofunc':{'pitch':'rv',
+                          'roll':'rh',
+                          'gaz':'lv',
+                          'yaw':'lh'},
+           'switchtofunc':{0:'start',
+                           2:'rth'}
+           }
 
-axistostick={'lv':1,
-             'lh':0,
-             'rv':3,
-             'rh':2}
+class ppConfigControlWindow(QDialog):
+    def __init__(self, parent=None):
+        super(ppConfigControlWindow, self).__init__(parent)
+        # Create widgets
+        self.btPitch = QPushButton("pitch: 0")
+        self.btRoll = QPushButton("roll: 0")
+        self.btYaw = QPushButton("Yaw: 0")
+        self.btGaz = QPushButton("Thrust: 0")
+        self.btTakeoff = QPushButton("Takeoff/Landing: 0")
+        self.btRth = QPushButton("RTH: 0")
+        # Create layout and add widgets
+        layout = QVBoxLayout()
+        layout.addWidget(self.btPitch)
+        layout.addWidget(self.btRoll)
+        layout.addWidget(self.btYaw)
+        layout.addWidget(self.btGaz)
+        layout.addWidget(self.btTakeoff)
+        layout.addWidget(self.btRth)
+        # Set dialog layout
+        self.setLayout(layout)
+        # Add button signal to greetings slot
 
-axisreverse={'lv':-1,
-             'lh':1,
-             'rv':-1,
-             'rh':1}
 
-sticktofunc={'pitch':'rv',
-             'roll':'rh',
-             'gaz':'lv',
-             'yaw':'lh'}
-switchtofunc={0:'start',
-              2:'rth'}
 
 class ppControlWidget(QWidget, QThread):
 
@@ -34,28 +56,45 @@ class ppControlWidget(QWidget, QThread):
 
         pygame.init()
         pygame.joystick.init()
-        cnt=pygame.joystick.get_count()
-        if(cnt==0):
+        self._joycnt=pygame.joystick.get_count()
+        print (self._joycnt)
+        if(self._joycnt==0):
             print('no joystick found')
-            sys.exit(0)
-        self._joystick = pygame.joystick.Joystick(0)
-        self._joystick.init()
-        print(self._joystick.get_name())
-        axes =self._joystick.get_numaxes()
+            #sys.exit(0)
+        else :
+            pygame.joystick.Joystick(0).init()
+            if(pygame.joystick.Joystick(0).get_numaxes()<4):
+                self._joycnt=0
 
         self._running=True
         self._instance=None
         self._periodicity=0.05 #time period between loops
         self.frame=QFrame()
-        self.setFixedSize(100,50)
-        self.layout = QVBoxLayout()
+        self.frame.setFixedSize(100,50)
+        self.btconfig=QPushButton(QIcon("res/config.png"),"")
+        self.setFixedSize(140,50)
+        self.layout = QHBoxLayout()
         self.layout.addWidget(self.frame)
+        self.layout.addWidget(self.btconfig)
         self.setLayout(self.layout)
-        pygame.event.pump()
-        self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
-                      'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
-                      'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
-                      'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
+        if(self._joycnt>0):
+            self._joystick = pygame.joystick.Joystick(0)
+            self._joystick.init()
+            print(self._joystick.get_name())
+            pygame.event.pump()
+            self._Sticks={'lv':self._joystick.get_axis(joytofunc['axistostick']['lv'])*joytofunc['axisreverse']['lv'],
+                          'lh':self._joystick.get_axis(joytofunc['axistostick']['lh'])*joytofunc['axisreverse']['lh'],
+                          'rv':self._joystick.get_axis(joytofunc['axistostick']['rv'])*joytofunc['axisreverse']['rv'],
+                          'rh':self._joystick.get_axis(joytofunc['axistostick']['rh'])*joytofunc['axisreverse']['rh']}
+        else:
+            self._joystick = None
+            self._Sticks={'lv':0,
+                          'lh':0,
+                          'rv':0,
+                          'rh':0}
+
+        self.btconfig.clicked.connect(self.config)
+        
         self.start()
         
     def __del__(self):
@@ -64,7 +103,7 @@ class ppControlWidget(QWidget, QThread):
 
     def paintEvent(self, paintEvent):
         painter = QPainter(self)
-        r=self.rect()
+        r=self.frame.rect()
         r-=QMargins(0,0,1,1)
         painter.drawRect(r)
         c1=QPoint(r.width()/4,r.height()/2)
@@ -85,27 +124,28 @@ class ppControlWidget(QWidget, QThread):
     def run(self):
         while(self._running):
             pygame.event.pump()
-            self._Sticks={'lv':self._joystick.get_axis(axistostick['lv'])*axisreverse['lv'],
-                          'lh':self._joystick.get_axis(axistostick['lh'])*axisreverse['lh'],
-                          'rv':self._joystick.get_axis(axistostick['rv'])*axisreverse['rv'],
-                          'rh':self._joystick.get_axis(axistostick['rh'])*axisreverse['rh']}
+            if(self._joycnt>0):
+                self._Sticks={'lv':self._joystick.get_axis(joytofunc['axistostick']['lv'])*joytofunc['axisreverse']['lv'],
+                              'lh':self._joystick.get_axis(joytofunc['axistostick']['lh'])*joytofunc['axisreverse']['lh'],
+                              'rv':self._joystick.get_axis(joytofunc['axistostick']['rv'])*joytofunc['axisreverse']['rv'],
+                              'rh':self._joystick.get_axis(joytofunc['axistostick']['rh'])*joytofunc['axisreverse']['rh']}
 
             if(self._instance is not None):
-                p=round(100*self._Sticks[sticktofunc['pitch']])
-                r=round(100*self._Sticks[sticktofunc['roll']])
-                y=round(100*self._Sticks[sticktofunc['yaw']])
-                t=round(100*self._Sticks[sticktofunc['gaz']])
+                p=round(100*self._Sticks[joytofunc['sticktofunc']['pitch']])
+                r=round(100*self._Sticks[joytofunc['sticktofunc']['roll']])
+                y=round(100*self._Sticks[joytofunc['sticktofunc']['yaw']])
+                t=round(100*self._Sticks[joytofunc['sticktofunc']['gaz']])
                 self._instance.PCMD(p,r,y,t)
 
                 for event in pygame.event.get(): # User did something
                     if event.type == pygame.JOYBUTTONDOWN:
-                        if(event.button in switchtofunc.keys()):
-                            if(switchtofunc[event.button]=='start'):
+                        if(event.button in joytofunc['switchtofunc'].keys()):
+                            if(joytofunc['switchtofunc'][event.button]=='start'):
                                 try: 
                                     self._instance.tkof_lnd_emcy()
                                 except:
                                     print("no device selected")
-                            if(switchtofunc[event.button]=='rth'):
+                            if(joytofunc['switchtofunc'][event.button]=='rth'):
                                 try: 
                                     self._instance.rth()
                                 except:
@@ -114,6 +154,9 @@ class ppControlWidget(QWidget, QThread):
             self.update()
             time.sleep(self._periodicity)
 
+    def config(self):
+        w=ppConfigControlWindow(parent=self)
+        w.show()
     @property
     def device(self):
         return self._instance
