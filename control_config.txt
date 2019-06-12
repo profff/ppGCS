@@ -1,0 +1,1 @@
+{"funcreverse": {"gaz": -1, "yaw": 1, "pitch": -1, "roll": 1}, "functoaxis": {"pitch": 3, "roll": 2, "gaz": 1, "yaw": 0}, "functoswitch": {"start": 0, "rth": 2}, "switchtofunc": {"0": "start", "2": "rth"}}
