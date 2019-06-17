@@ -1,6 +1,6 @@
 import sys
 from PySide2.QtWidgets import QApplication, QListWidgetItem, QListWidget
-from PySide2.QtWidgets import QHBoxLayout, QPushButton, QWidget, QLabel
+from PySide2.QtWidgets import QHBoxLayout, QPushButton, QWidget, QLabel, QCheckBox
 from PySide2.QtWidgets import QGroupBox, QFrame,QDialog,QLineEdit, QVBoxLayout
 from PySide2.QtCore import Signal, Slot, QThread, QMargins, QPoint
 from PySide2.QtGui import QPainter,QIcon
@@ -29,6 +29,17 @@ except:
 joytofunc['switchtofunc']={y:x for x,y in joytofunc['functoswitch'].items()}
 bindaxis=None
 
+def AxisBind(ch,bt):
+    global bindaxis
+    if bindaxis==None:
+        print("%s is selected for detecion : move the stick to max to assign it"%(ch)) 
+        bindaxis=ch
+def SwitchBind(ch,bt):
+    global bindaxis
+    if bindaxis==None:
+        print("%s is selected for detecion : Press game pad switch to assign it"%(ch)) 
+        bindaxis=ch
+    
 def bindtopitch():
     global bindaxis
     bindaxis='pitch'
@@ -51,6 +62,16 @@ def bindsave():
     with open('control_config.txt', 'w') as outfile:  
         json.dump(joytofunc, outfile)
         outfile.close()
+        
+def setReverse(ch,cb):
+    f=cb.isChecked()
+    print ("set channel %s reverse to %d" %(ch,f))
+    if f:
+        joytofunc['funcreverse'][ch]=-1
+    else:
+        joytofunc['funcreverse'][ch]=1
+        
+        
 
 class ppConfigControlWindow(QDialog):
     def __init__(self, parent=None):
@@ -58,32 +79,60 @@ class ppConfigControlWindow(QDialog):
         # Create widgets
         s=self.parent().Sticks
         self.btPitch = QPushButton("pitch: 0")
+        self.ckPitchRev = QCheckBox("rev")
+        lp=QHBoxLayout()
+        lp.addWidget(self.btPitch)
+        lp.addWidget(self.ckPitchRev)
+        if joytofunc['funcreverse']['pitch']==-1:
+            self.ckPitchRev.setChecked(True) 
         self.btRoll = QPushButton("roll: 0")
+        self.ckRollRev = QCheckBox('rev')
+        lr=QHBoxLayout()
+        lr.addWidget(self.btRoll)
+        lr.addWidget(self.ckRollRev)
+        if joytofunc['funcreverse']['roll']==-1:
+            self.ckRollRev.setChecked(True) 
         self.btYaw = QPushButton("Yaw: 0")
+        self.ckYawRev = QCheckBox('rev')
+        ly=QHBoxLayout()
+        ly.addWidget(self.btYaw)
+        ly.addWidget(self.ckYawRev)
+        if joytofunc['funcreverse']['yaw']==-1:
+            self.ckYawRev.setChecked(True) 
         self.btGaz = QPushButton("Thrust: 0")
+        self.ckGazRev = QCheckBox('rev')
+        lg=QHBoxLayout()
+        lg.addWidget(self.btGaz)
+        lg.addWidget(self.ckGazRev)
+        if joytofunc['funcreverse']['gaz']==-1:
+            self.ckGazRev.setChecked(True) 
+
         self.btTakeoff = QPushButton("Takeoff/Landing: 0")
         self.btRth = QPushButton("RTH: 0")
         self.btSave = QPushButton("Save")
         # Create layout and add widgets
         layout = QVBoxLayout()
-        layout.addWidget(self.btPitch)
-        layout.addWidget(self.btRoll)
-        layout.addWidget(self.btYaw)
-        layout.addWidget(self.btGaz)
+        layout.addLayout(lp)
+        layout.addLayout(lr)
+        layout.addLayout(ly)
+        layout.addLayout(lg)
         layout.addWidget(self.btTakeoff)
         layout.addWidget(self.btRth)
         layout.addWidget(self.btSave)
         # Set dialog layout
         self.setLayout(layout)
         # Add button signal to slot
-        self.btPitch.clicked.connect(bindtopitch)
-        self.btRoll.clicked.connect(bindtoroll)
-        self.btYaw.clicked.connect(bindtoyaw)
-        self.btGaz.clicked.connect(bindtogaz)
-        self.btTakeoff.clicked.connect(bindtostart)
-        self.btRth.clicked.connect(bindtorth)
+        self.btPitch.clicked.connect(lambda:AxisBind('pitch',self.btPitch))
+        self.btRoll.clicked.connect(lambda:AxisBind('roll',self.btRoll))
+        self.btYaw.clicked.connect(lambda:AxisBind('yaw',self.btYaw))
+        self.btGaz.clicked.connect(lambda:AxisBind('gaz',self.btGaz))
+        self.btTakeoff.clicked.connect(lambda:SwitchBind('start',self.btTakeoff))
+        self.btRth.clicked.connect(lambda:SwitchBind('rth',self.btRth))
         self.btSave.clicked.connect(bindsave)
-
+        self.ckPitchRev.toggled.connect(lambda:setReverse('pitch',self.ckPitchRev))
+        self.ckRollRev.toggled.connect(lambda:setReverse('roll',self.ckRollRev))
+        self.ckYawRev.toggled.connect(lambda:setReverse('yaw',self.ckYawRev))
+        self.ckGazRev.toggled.connect(lambda:setReverse('gaz',self.ckGazRev))
     def freshValues(self,p,r,y,g,to,rt):
         self.btPitch.setText("pitch: %d"%p)
         self.btRoll.setText("roll: %d"%r)
