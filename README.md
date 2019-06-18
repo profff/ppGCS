@@ -32,6 +32,13 @@ install vlc and libvlc
 
   ```sudo apt install vlc libvlc-dev```
 
+OpenSSl
+
+it looks QT dont like last openssl release you have to downgrade to at least 1.0.2 to get map support
+procedure is a bit tedious but trust me game is worth it!
+
+follow this tutorial : https://www.howtoforge.com/tutorial/how-to-install-openssl-from-source-on-linux/
+and it's ok
 
 
 this is in perputual developpement so if it dont fit's your needs be patient or be active !!!!! ;)   
